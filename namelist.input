@@ -1,0 +1,67 @@
+####################################################################################
+# Simulation namelist                                                              #
+####################################################################################
+
+####################################################################################
+# Section 1: General variables            
+
+nSpecies = 4		# Number of substances to simulate
+startPop = 20 		# Number of starting bacteria
+ensemble = 1		# Number of bacteria to form basis of ensemble
+nT       = 10000
+dt       = 2e-2
+tOut     = 10
+fout_name = "test.nc"
+t_solver = "centered_rich"
+
+
+####################################################################################
+# Section 2: Bacteria specific variables
+
+Lz = 1.5
+Lr = 0.250
+nR = 7
+nZ = 75
+nP = 30
+
+
+####################################################################################
+# Section 3: Species related variables and diffusion related variables
+
+names    = ["substance A", "substance B", "substance AB", "passive"]
+pore     = [      0      ,      0       ,       0       ,    25    ]
+
+initial_concentration = np.ones([ensemble,nSpecies]) * 1e-5 # Units of 1e-15 mol/micron^3
+D  = np.ones(nSpecies) * 0.9e-3 # Diffusion constant of molar lactic acid in water
+outer_concentration = np.ones(nSpecies) * 1e-4   # Units of 1e-15 mol/micron^3
+
+
+####################################################################################
+# Section 4: Interaction related variables
+# See notes on specifying_interaction.txt to understand how to specify
+
+interac_list = 
+
+
+
+interact_coeff = np.zeros([nSpecies, nSpecies], dtype="f8")
+# Note that the first dimension corresponds to the substance itself, the second dimension corresponds to the reaction constants of the said substance to the other substances.
+interact_coeff[0,:] = np.array([0, -1e-4, 0.5e-4, 0]) # Substance A coeff
+interact_coeff[1,:] = np.array([-1e-4, 0, 0.5e-4, 0]) # Substance B coeff
+interact_coeff[2,:] = np.array([ 1e-4, 1e-4, -0.5e-4, 0]) # Substance C coeff
+
+
+####################################################################################
+# Section 5: Point source releases (please specify explicitly)
+
+
+
+
+
+
+
+####################################################################################
+# Section 6: Membrane-environment transporter
+
+
+
