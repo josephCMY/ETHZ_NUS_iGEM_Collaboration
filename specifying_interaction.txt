@@ -1,0 +1,28 @@
+#################################################################
+# How to specify interaction related variables in the namelist? #
+#################################################################
+
+As of 20160708, the only interactions built into this model relate to chemical reactions, or something that can be written like a stoichiometric equation. Furthermore, all reversible reactions will be treated as two reactions (ie, split up).
+
+Consider the following example:
+    c1*A + c2*B + c3*C <=> ABC
+where c1, c2 and c3 are stoichiometric coefficients.
+
+Ie, we will have two reactions:
+     c1*A + c2*B + c3*C -> c4*ABC   -------  with rate constant k1
+     c4*ABC -> c1*A + c2*B + c3*C   -------  with rate constant k2
+
+As such, the reaction rates are defined (respectively):
+     r1 = k1  [A]^a1 [B]^b1 [C]^c1 [ABC]^n1
+     r2 = k2  [A]^a2 [B]^b2 [C]^c2 [ABC]^n2
+
+
+Note that a1, a2, b1, b2, c1, c2, n1 and n2 do not necessarily coincide with the stoichiometric coefficients! If the two processes have intermediate steps, then it is likely to be different. 
+
+Also:
+     r1 = -(d[A]/dt)/c1 = -(d[B]/dt)/c2 = -(d[C]/dt)/c3 =  (d[ABC]/dt)/c4
+     r2 =  (d[A]/dt)/c1 =  (d[B]/dt)/c2 =  (d[C]/dt)/c3 = -(d[ABC]/dt)/c4
+
+Note that r1 and r2 are not negative of each other!!!! As mentioned earlier, we are splitting the reversible reaction into two parts.
+
+Thus, it should be clear that for every one-way reaction, we require 

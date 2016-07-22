@@ -3,7 +3,7 @@ import time
 import math as m
 import multiprocessing as mp
 import diffusion_step as diff
-from interaction_step import interaction_step as interac
+from interaction_step import interaction_step as iStep
 from netCDF4 import Dataset
 
 
@@ -11,7 +11,7 @@ from netCDF4 import Dataset
 # EULER FORWARD STEPPING INTEGRATOR [ ERROR TERM: O(dt) ]                          #
 ####################################################################################
 
-def euler_forward_integrator( conc_all, nR, nP, nZ, t00, cyl_rL, cyl_rR, cyl_r0, cyl_pL, cyl_pR, cyl_p0, cyl_zL, cyl_zR, cyl_z0, cyl_rA1, cyl_rA2, cyl_rA3, cyl_rB1, cyl_rB2, cyl_rB3, dp, dr, dz, store_tt_arr, tt_marker, store_tt, nT, cyl_invR2, D, dt, tOut, ensemble, nSpecies, pore_z, pore_p, outer_concentration, pore, interact_coeff):
+def euler_forward_integrator( conc_all, nR, nP, nZ, t00, cyl_rL, cyl_rR, cyl_r0, cyl_pL, cyl_pR, cyl_p0, cyl_zL, cyl_zR, cyl_z0, cyl_rA1, cyl_rA2, cyl_rA3, cyl_rB1, cyl_rB2, cyl_rB3, dp, dr, dz, store_tt_arr, tt_marker, store_tt, nT, cyl_invR2, D, dt, tOut, ensemble, nSpecies, pore_z, pore_p, outer_concentration, pore, iFunc_ind):
 
     conc_00 = np.zeros([ensemble, nSpecies, nZ+2, nP+2, nR+2],dtype="f4")
 
@@ -35,7 +35,9 @@ def euler_forward_integrator( conc_all, nR, nP, nZ, t00, cyl_rL, cyl_rR, cyl_r0,
     interact_dim1 = (ensemble, nSpecies, nZ+2, nP+2, nR+2)
     interact_arr  = mp.Array('d', interact_dim0)
 
-    
+    shp = np.shape(conc_00[0,:,:,:,:])
+    blank = np.zeros(shp, dtype="f8")
+ 
     while tstep <= nT:
 
         # Handling the diffusion processes
@@ -61,11 +63,11 @@ def euler_forward_integrator( conc_all, nR, nP, nZ, t00, cyl_rL, cyl_rR, cyl_r0,
         diffuse = diffuse0.reshape(diff_dim1)
         
         # Handling the species interaction step
-        processes = [mp.Process( target = interac \
-                                , args = ( conc_00, interact_coeff, interact_arr   \
-                                          , nSpecies, interact_dim1, n1, n2)       \
-                               )  \
-                     for n1 in np.arange(ensemble) for n2 in np.arange(nSpecies)]
+        processes = [mp.Process( target =  iStep
+                                , args = ( conc_00, interact_arr, n1		\
+                                          , iFunc_ind[fInd], fInd, interact_dim1))\
+                     for n1 in np.arange(ensemble) \
+                     for fInd in np.arange(len(iFunc_ind))]
 
         for p in processes:
             p.start()
@@ -76,6 +78,9 @@ def euler_forward_integrator( conc_all, nR, nP, nZ, t00, cyl_rL, cyl_rR, cyl_r0,
 
         interact0 = np.frombuffer( interact_arr.get_obj() )
         interact  = interact0.reshape(interact_dim1)
+
+#        print np.sum(interact)
+
 
         conc_11 = conc_00 + diffuse*dt + interact*dt
 

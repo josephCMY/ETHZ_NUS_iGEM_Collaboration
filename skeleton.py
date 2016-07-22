@@ -22,6 +22,7 @@ from netCDF4 import Dataset
 import initialize as ini
 import solvers    as sol
 import writeout   as wo
+import interaction_generator as iGen
 import pore_generator as po
 print ""
 print "%.3f seconds --- Libraries imported" % (time.time() - t00)
@@ -34,6 +35,8 @@ print ""
 print "%.3f seconds --- Reading namelist" % (time.time() - t00)
 
 execfile("namelist.input")
+
+iFunc_ind = iGen.interaction_maker( names, interaction)
 
 print ""
 print "%.3f seconds --- Generating pore locations." % (time.time() - t00)
@@ -77,7 +80,7 @@ dr = Lr/nR
 dz = Lz/nZ
 
 dnT = nT/tOut
-store_tt_arr = np.arange( 1 , tOut + 1 , dtype="i16" ) * dnT
+store_tt_arr = np.arange( 1 , tOut + 1 , dtype="i8" ) * dnT
 tt_marker = 0
 store_tt = store_tt_arr[tt_marker]
 
@@ -88,7 +91,7 @@ store_tt = store_tt_arr[tt_marker]
 print ""
 print "%.3f seconds --- Proceeding with time integration" % (time.time() - t00)
 
-conc_all = sol.euler_forward_integrator(conc_all, nR, nP, nZ, t00, cyl_rL, cyl_rR, cyl_r0, cyl_pL, cyl_pR, cyl_p0, cyl_zL, cyl_zR, cyl_z0, cyl_rA1, cyl_rA2, cyl_rA3, cyl_rB1, cyl_rB2, cyl_rB3, dp, dr, dz, store_tt_arr, tt_marker, store_tt, nT, cyl_invR2, D, dt, tOut, ensemble, nSpecies, pore_z, pore_p, outer_concentration, pore, interact_coeff)
+conc_all = sol.euler_forward_integrator(conc_all, nR, nP, nZ, t00, cyl_rL, cyl_rR, cyl_r0, cyl_pL, cyl_pR, cyl_p0, cyl_zL, cyl_zR, cyl_z0, cyl_rA1, cyl_rA2, cyl_rA3, cyl_rB1, cyl_rB2, cyl_rB3, dp, dr, dz, store_tt_arr, tt_marker, store_tt, nT, cyl_invR2, D, dt, tOut, ensemble, nSpecies, pore_z, pore_p, outer_concentration, pore, iFunc_ind)
 
 print ""
 print "%.3f seconds --- Time integration completed" % (time.time() - t00)

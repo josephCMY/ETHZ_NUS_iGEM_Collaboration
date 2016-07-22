@@ -5,11 +5,11 @@
 ####################################################################################
 # Section 1: General variables            
 
-nSpecies = 4		# Number of substances to simulate
-startPop = 20 		# Number of starting bacteria
+nSpecies = 3		# Number of substances to simulate
+startPop = 1 		# Number of starting bacteria
 ensemble = 1		# Number of bacteria to form basis of ensemble
-nT       = 10000
-dt       = 2e-2
+nT       = 100*600
+dt       = 1e-2
 tOut     = 10
 fout_name = "test.nc"
 t_solver = "centered_rich"
@@ -28,10 +28,15 @@ nP = 30
 ####################################################################################
 # Section 3: Species related variables and diffusion related variables
 
-names    = ["substance A", "substance B", "substance AB", "passive"]
-pore     = [      0      ,      0       ,       0       ,    25    ]
+names    = ["A", "B", "AB"]
+pore     = [ 0 ,  0 ,  0  ]
 
-initial_concentration = np.ones([ensemble,nSpecies]) * 1e-5 # Units of 1e-15 mol/micron^3
+#initial_concentration = np.ones([ensemble,nSpecies]) * 1e-5 # Units of 1e-15 mol/micron^3
+
+initial_concentration = np.zeros([ensemble, nSpecies])
+initial_concentration[:,0] = 1 #e-5
+initial_concentration[:,1] = 2 #e-5
+
 D  = np.ones(nSpecies) * 0.9e-3 # Diffusion constant of molar lactic acid in water
 outer_concentration = np.ones(nSpecies) * 1e-4   # Units of 1e-15 mol/micron^3
 
@@ -40,19 +45,23 @@ outer_concentration = np.ones(nSpecies) * 1e-4   # Units of 1e-15 mol/micron^3
 # Section 4: Interaction related variables
 # See notes on specifying_interaction.txt to understand how to specify
 
-interac_list = 
-
-
-
-interact_coeff = np.zeros([nSpecies, nSpecies], dtype="f8")
-# Note that the first dimension corresponds to the substance itself, the second dimension corresponds to the reaction constants of the said substance to the other substances.
-interact_coeff[0,:] = np.array([0, -1e-4, 0.5e-4, 0]) # Substance A coeff
-interact_coeff[1,:] = np.array([-1e-4, 0, 0.5e-4, 0]) # Substance B coeff
-interact_coeff[2,:] = np.array([ 1e-4, 1e-4, -0.5e-4, 0]) # Substance C coeff
+interaction =	[
+			["A", [-1, "A" , 1 , "B" , 1 ]	\
+			    , [ 2, "AB", 1 ]			\
+			],
+			["AB", [ 1, "A" , 1 , "B" , 1 ]	\
+			     , [-2, "AB", 1 ]		\
+			],
+			["B", [-1, "A" , 1 , "B" , 1 ]	\
+			    , [ 2, "AB", 1 ]			\
+			]
+		]
 
 
 ####################################################################################
 # Section 5: Point source releases (please specify explicitly)
+# Must be in terms of the index of the system
+
 
 
 
